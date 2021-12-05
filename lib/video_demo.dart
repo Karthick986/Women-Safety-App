@@ -6,12 +6,18 @@ import 'package:flutter_mailer/flutter_mailer.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:safety_application/home.dart';
 
 class VideoRecorder extends StatefulWidget {
-  String imagePathB, imagePathF, lat, long;
+  String imagePathB, imagePathF, lat, long, email, mobile;
 
-  VideoRecorder({Key? key, required this.imagePathB,
-    required this.imagePathF, required this.lat, required this.long}) : super(key: key);
+  VideoRecorder(
+      {Key? key,
+      required this.imagePathB,
+      required this.imagePathF,
+      required this.lat,
+      required this.long, required this.email, required this.mobile})
+      : super(key: key);
 
   @override
   _VideoRecorderState createState() => _VideoRecorderState();
@@ -22,26 +28,22 @@ class _VideoRecorderState extends State<VideoRecorder> {
   String? videoPath;
 
   List<CameraDescription>? cameras;
-  int selectedCameraIdx=0;
+  int selectedCameraIdx = 0;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future sendEmail(videoPath) async {
     const GMAIL_SCHEMA = 'com.google.android.gm';
-
-    // final bool gmailinstalled =  await isAppInstalled(GMAIL_SCHEMA);
-
-    // if(gmailinstalled) {
-      final MailOptions mailOptions = MailOptions(
-        body: 'I am in danger, please find my attached pics/video.\n\nMy Current location is -\n'
-            'https://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}',
-        subject: 'Please Help! I am Kartik',
-        recipients: ['rokadeshubham0000@gmail.com'],
-        attachments: [widget.imagePathF, widget.imagePathB, videoPath],
-        appSchema: GMAIL_SCHEMA,
-      );
-      await FlutterMailer.send(mailOptions);
-    // }
+    final MailOptions mailOptions = MailOptions(
+      body:
+          'I am in danger, please find my attached pics/video.\n\nMy Current location is -\n'
+          'https://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}',
+      subject: 'Please Help! I am Kartik',
+      recipients: [widget.email],
+      attachments: [widget.imagePathF, widget.imagePathB, videoPath],
+      appSchema: GMAIL_SCHEMA,
+    );
+    await FlutterMailer.send(mailOptions);
   }
 
   @override
@@ -50,26 +52,23 @@ class _VideoRecorderState extends State<VideoRecorder> {
 
     // Get the listonNewCameraSelected of available cameras.
     // Then set the first camera as selected.
-    availableCameras()
-        .then((availableCameras) {
+    availableCameras().then((availableCameras) {
       cameras = availableCameras;
 
-      if (cameras!.length > 0) {
+      if (cameras!.isNotEmpty) {
         setState(() {
           selectedCameraIdx = 0;
         });
 
         _onCameraSwitched(cameras![selectedCameraIdx]).then((void v) {});
       }
-    })
-        .catchError((err) {
+    }).catchError((err) {
       print('Error: $err.code\nError Message: $err.message');
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -86,9 +85,10 @@ class _VideoRecorderState extends State<VideoRecorder> {
               decoration: BoxDecoration(
                 color: Colors.black,
                 border: Border.all(
-                  color: controller != null && controller!.value.isRecordingVideo
-                      ? Colors.redAccent
-                      : Colors.grey,
+                  color:
+                      controller != null && controller!.value.isRecordingVideo
+                          ? Colors.redAccent
+                          : Colors.grey,
                   width: 3.0,
                 ),
               ),
@@ -139,7 +139,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
     }
 
     return AspectRatio(
-      aspectRatio: controller==null ? 1.0 : controller!.value.aspectRatio,
+      aspectRatio: controller == null ? 1.0 : controller!.value.aspectRatio,
       child: CameraPreview(controller!),
     );
   }
@@ -158,12 +158,9 @@ class _VideoRecorderState extends State<VideoRecorder> {
         alignment: Alignment.centerLeft,
         child: FlatButton.icon(
             onPressed: _onSwitchCamera,
-            icon: Icon(
-                _getCameraLensIcon(lensDirection)
-            ),
-            label: Text("${lensDirection.toString()
-                .substring(lensDirection.toString().indexOf('.')+1)}")
-        ),
+            icon: Icon(_getCameraLensIcon(lensDirection)),
+            label: Text(
+                "${lensDirection.toString().substring(lensDirection.toString().indexOf('.') + 1)}")),
       ),
     );
   }
@@ -181,8 +178,8 @@ class _VideoRecorderState extends State<VideoRecorder> {
               icon: const Icon(Icons.videocam),
               color: Colors.blue,
               onPressed: controller != null &&
-                  controller!.value.isInitialized &&
-                  !controller!.value.isRecordingVideo
+                      controller!.value.isInitialized &&
+                      !controller!.value.isRecordingVideo
                   ? _onRecordButtonPressed
                   : null,
             ),
@@ -190,8 +187,8 @@ class _VideoRecorderState extends State<VideoRecorder> {
               icon: const Icon(Icons.stop),
               color: Colors.red,
               onPressed: controller != null &&
-                  controller!.value.isInitialized &&
-                  controller!.value.isRecordingVideo
+                      controller!.value.isInitialized &&
+                      controller!.value.isRecordingVideo
                   ? _onStopButtonPressed
                   : null,
             )
@@ -223,8 +220,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
             gravity: ToastGravity.CENTER,
             timeInSecForIosWeb: 1,
             backgroundColor: Colors.red,
-            textColor: Colors.white
-        );
+            textColor: Colors.white);
       }
     });
 
@@ -240,9 +236,8 @@ class _VideoRecorderState extends State<VideoRecorder> {
   }
 
   void _onSwitchCamera() {
-    selectedCameraIdx = selectedCameraIdx < cameras!.length - 1
-        ? selectedCameraIdx + 1
-        : 0;
+    selectedCameraIdx =
+        selectedCameraIdx < cameras!.length - 1 ? selectedCameraIdx + 1 : 0;
     CameraDescription selectedCamera = cameras![selectedCameraIdx];
 
     _onCameraSwitched(selectedCamera);
@@ -260,13 +255,12 @@ class _VideoRecorderState extends State<VideoRecorder> {
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.grey,
-          textColor: Colors.white
-      );
+          textColor: Colors.white);
     });
   }
 
-  void _onStopButtonPressed() {
-    _stopVideoRecording().then((file) {
+  Future _onStopButtonPressed() async {
+    await _stopVideoRecording().then((file) {
       videoPath = file.toString();
       if (mounted) setState(() {});
       Fluttertoast.showToast(
@@ -275,15 +269,38 @@ class _VideoRecorderState extends State<VideoRecorder> {
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.grey,
-          textColor: Colors.white
-      );
+          textColor: Colors.white);
       print(videoPath.toString());
-      sendSMS(message: "Please Help! I am in danger.\n\nMy current Location is -"
-          "\nhttps://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}",
-          recipients: ["9226738659"]).whenComplete(() => sendEmail(videoPath).whenComplete(() => () {
+      sendSMS(
+          message: "Please Help! I am in danger.\n\nMy current Location is -"
+              "\nhttps://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}",
+          recipients: [widget.mobile
+            // "9226738659"
+            // 'rokadeshubham0000@gmail.com'
+          ]).whenComplete(() => sendEmail(videoPath).whenComplete(() => () {
             Navigator.pop(context);
-            Fluttertoast.showToast(msg: "Alert Sent!");
-      }));
+            Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => HomePage()));
+            // showDialog(
+            //     context: context,
+            //     builder: (context) => AlertDialog(
+            //             title: Text("Alert Sent!"),
+            //             content: Text(
+            //                 "Details are sent on your mentioned email and mobile no."),
+            //             actions: [
+            //               FlatButton(
+            //                   onPressed: () {
+            //                     Navigator.pushReplacement(
+            //                         context,
+            //                         MaterialPageRoute(
+            //                             builder: (context) => HomePage()));
+            //                   },
+            //                   child: Text("OK"))
+            //             ]));
+            // Fluttertoast.showToast(msg: "Alert Sent!");
+          }));
     });
   }
 
@@ -295,8 +312,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.grey,
-          textColor: Colors.white
-      );
+          textColor: Colors.white);
     }
 
     // Do nothing if a recording is on progress
@@ -322,13 +338,13 @@ class _VideoRecorderState extends State<VideoRecorder> {
       return file!.path;
     }
     else {
-      try {
-        file = await controller!.stopVideoRecording();
-      } on CameraException catch (e) {
-        _showCameraException(e);
-      }
+    try {
+      file = await controller!.stopVideoRecording();
+      return file.path;
+    } on CameraException catch (e) {
+      _showCameraException(e);
     }
-    return file!.path;
+    }
   }
 
   void _showCameraException(CameraException e) {
@@ -341,7 +357,6 @@ class _VideoRecorderState extends State<VideoRecorder> {
         gravity: ToastGravity.CENTER,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
-        textColor: Colors.white
-    );
+        textColor: Colors.white);
   }
 }

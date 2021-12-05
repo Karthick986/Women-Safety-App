@@ -1,12 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mailer/flutter_mailer.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
 import 'dart:io' as IO;
 import 'package:safety_application/main.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:safety_application/profile.dart';
 import 'package:safety_application/video_demo.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,7 +35,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Location location = Location();
-  String lat = "", long = "";
+  String lat = "", long = "", rMail="", rMobile="", name="";
 
   IO.File? _imageFileFront, _imageFileBack;
 
@@ -89,27 +91,32 @@ class _HomeState extends State<Home> {
       lat = _locationData.latitude.toString();
       long = _locationData.longitude.toString();
     });
-    Navigator.pop(context);
     Fluttertoast.showToast(msg: "Current Location found!");
+    await redirect();
+  }
+
+  Future redirect() async {
     await pickFrontCamera().whenComplete(() => pickBackCamera().whenComplete(() =>
         Navigator.push(context,
-        MaterialPageRoute(builder: (context) => VideoRecorder(imagePathB: _imageFileBack!.path.toString(),
-          imagePathF: _imageFileFront!.path.toString(), lat: lat, long: long)))
+            MaterialPageRoute(builder: (context) => VideoRecorder(imagePathB: _imageFileBack!.path.toString(),
+              imagePathF: _imageFileFront!.path.toString(), lat: lat, long: long, email: rMail, mobile: rMobile,)))
     ));
   }
 
   Future _progressDialog(BuildContext context) {
     return showDialog(
         context: context,
-        barrierDismissible: false,
+        barrierDismissible: true,
         builder: (BuildContext context) {
-          return WillPopScope(
-            onWillPop: () {
-              return Future.value(false);
-            },
-            child: const Center(
+          return
+            // WillPopScope(
+            // onWillPop: () {
+            //   return Future.value(false);
+            // },
+            // child:
+            Center(
               child: CircularProgressIndicator(),
-            ),
+          //   ),
           );
         });
   }
@@ -123,7 +130,7 @@ class _HomeState extends State<Home> {
         child: const Text('No'));
     Widget continueButton = TextButton(
         onPressed: () async {
-          Navigator.pop(context);
+          Navigator.canPop(context);
           FirebaseAuth.instance.signOut().then((value) =>
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (context) => Login())));
@@ -156,17 +163,40 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future getData() async {
+    var document = FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid);
+    document.get().then((value) {
+      setState(() {
+        name = value["name"];
+        rMail = value["rmail"];
+        rMobile = value["rmobile"];
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     checkPermission();
+    Firebase.initializeApp();
+    getData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Safety Application"),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(child: Icon(Icons.person_pin_sharp),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+            },),
+            SizedBox(width: 16,),
+            Text("Safety Application"),
+          ],
+        ),
         actions: [
           InkWell(
             child: Padding(
@@ -179,31 +209,79 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            InkWell(
-              child: Container(
-                height: MediaQuery.of(context).size.width/2,
-                width: MediaQuery.of(context).size.width/2,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width/2),
-                color: Colors.redAccent),
-                child: Center(child: Text("Help!", style: TextStyle(color: Colors.white, fontSize: 25),)),
-              ),
-              onTap: () {
-                _progressDialog(context);
-                getLatLng();
-              },
-            ),
-            // SizedBox(height: 16,),
-            // FlatButton(
-            //     onPressed: () => launch("tel://9579831122"),
-            //     child: new Text("Call me")),
-          ],
-        ),
-      ),
-    );
+      body: name.isEmpty
+          ? Center(
+          child: CircularProgressIndicator())
+          : Padding(
+            padding: const EdgeInsets.all(36.0),
+            child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 5,
+                      child: InkWell(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 2),
+                              color: Colors.redAccent),
+                          child: Center(child: Text("Alert Me!",
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 25),)),
+                        ),
+                        onTap: () {
+                          _progressDialog(context);
+                          getLatLng();
+                        },
+                      ),
+                    ),
+                    Spacer(),
+                    Expanded(
+                      flex: 3,
+                      child: InkWell(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 2),
+                              color: Colors.green),
+                          child: Center(child: Text("Alert SMS!",
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 23),)),
+                        ),
+                        onTap: () {
+                          _progressDialog(context);
+                          getLatLng();
+                          sendSMS(
+                              message: "Please Help! I am in danger.\n\nMy current Location is -"
+                                  "\nhttps://www.google.com/maps/search/?api=1&query=$lat,$long",
+                              recipients: [rMobile]).whenComplete(() => Fluttertoast.showToast(msg: "Alert SMS Sent!"));
+                        },
+                      ),
+                    ),
+                    Spacer(),
+                    Expanded(
+                      flex: 3,
+                      child: InkWell(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 2),
+                              color: Colors.deepPurpleAccent),
+                          child: Center(child: Text("Alert Call!",
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 20),)),
+                        ),
+                        onTap: () => launch("tel://$rMobile"),
+                      ),
+                    ),
+                  ],
+                ),
+          ));
   }
 }
