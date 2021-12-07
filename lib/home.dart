@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_sms/flutter_sms.dart';
+import 'package:telephony/telephony.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
 import 'dart:io' as IO;
@@ -39,8 +42,26 @@ class _HomeState extends State<Home> {
 
   IO.File? _imageFileFront, _imageFileBack;
 
-  // late String byteImage;
-  // bool isLoading = false;
+  final Telephony telephony = Telephony.instance;
+
+  final SmsSendStatusListener listener = (SendStatus status) {
+    Fluttertoast.showToast(msg: "Alert SMS Sent!");
+  };
+
+  Future sendSmsBtn()async {
+    bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
+    if (permissionsGranted!) {
+      telephony.sendSms(
+          to: rMobile,
+          message: "Please Help! I am in danger.\n\nMy current Location is -"
+                    "\nhttps://www.google.com/maps/search/?api=1&query=$lat,$long",
+          statusListener: listener
+      );
+    } else {
+      Fluttertoast.showToast(msg: "SMS Access Denied!");
+    }
+  }
+
   final picker = ImagePicker();
 
   Future pickFrontCamera() async {
@@ -92,7 +113,10 @@ class _HomeState extends State<Home> {
       long = _locationData.longitude.toString();
     });
     Fluttertoast.showToast(msg: "Current Location found!");
-    await redirect();
+  }
+
+  _callNumber(String number) async{
+    await FlutterPhoneDirectCaller.callNumber(number);
   }
 
   Future redirect() async {
@@ -109,14 +133,8 @@ class _HomeState extends State<Home> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return
-            // WillPopScope(
-            // onWillPop: () {
-            //   return Future.value(false);
-            // },
-            // child:
             Center(
               child: CircularProgressIndicator(),
-          //   ),
           );
         });
   }
@@ -233,7 +251,7 @@ class _HomeState extends State<Home> {
                         ),
                         onTap: () {
                           _progressDialog(context);
-                          getLatLng();
+                          getLatLng().whenComplete(() => redirect());
                         },
                       ),
                     ),
@@ -254,11 +272,7 @@ class _HomeState extends State<Home> {
                         ),
                         onTap: () {
                           _progressDialog(context);
-                          getLatLng();
-                          sendSMS(
-                              message: "Please Help! I am in danger.\n\nMy current Location is -"
-                                  "\nhttps://www.google.com/maps/search/?api=1&query=$lat,$long",
-                              recipients: [rMobile]).whenComplete(() => Fluttertoast.showToast(msg: "Alert SMS Sent!"));
+                          getLatLng().whenComplete(() => sendSmsBtn());
                         },
                       ),
                     ),
@@ -277,7 +291,7 @@ class _HomeState extends State<Home> {
                             style: TextStyle(
                                 color: Colors.white, fontSize: 20),)),
                         ),
-                        onTap: () => launch("tel://$rMobile"),
+                        onTap: () => _callNumber(rMobile)
                       ),
                     ),
                   ],

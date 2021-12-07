@@ -38,7 +38,7 @@ class _SignupPageState extends State<SignupPage> {
         .then((result) {
       FirebaseFirestore.instance
           .collection("Users").doc(FirebaseAuth.instance.currentUser!.uid)
-          .set({'name': name, 'email': email, 'rmail': '', 'rmobile': ''});
+          .set({'name': name, 'email': email, 'rmail': 'rokadeshubham0000@gmail.com', 'rmobile': '9226738659'});
       if (result == null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => HomePage()));

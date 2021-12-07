@@ -7,6 +7,7 @@ import 'package:flutter_sms/flutter_sms.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:safety_application/home.dart';
+import 'package:telephony/telephony.dart';
 
 class VideoRecorder extends StatefulWidget {
   String imagePathB, imagePathF, lat, long, email, mobile;
@@ -259,6 +260,26 @@ class _VideoRecorderState extends State<VideoRecorder> {
     });
   }
 
+  final Telephony telephony = Telephony.instance;
+
+  final SmsSendStatusListener listener = (SendStatus status) {
+    Fluttertoast.showToast(msg: "Alert SMS Sent!");
+  };
+
+  Future sendSmsBtn()async {
+    bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
+    if (permissionsGranted!) {
+      telephony.sendSms(
+          to: widget.mobile,
+          message: "Please Help! I am in danger.\n\nMy current Location is -"
+              "\nhttps://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}",
+          statusListener: listener
+      );
+    } else {
+      Fluttertoast.showToast(msg: "SMS Access Denied!");
+    }
+  }
+
   Future _onStopButtonPressed() async {
     await _stopVideoRecording().then((file) {
       videoPath = file.toString();
@@ -271,13 +292,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
           backgroundColor: Colors.grey,
           textColor: Colors.white);
       print(videoPath.toString());
-      sendSMS(
-          message: "Please Help! I am in danger.\n\nMy current Location is -"
-              "\nhttps://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}",
-          recipients: [widget.mobile
-            // "9226738659"
-            // 'rokadeshubham0000@gmail.com'
-          ]).whenComplete(() => sendEmail(videoPath).whenComplete(() => () {
+      sendSmsBtn().whenComplete(() => sendEmail(videoPath).whenComplete(() => () {
             Navigator.pop(context);
             Navigator.pushReplacement(
                                         context,

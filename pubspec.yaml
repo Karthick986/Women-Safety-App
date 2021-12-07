@@ -24,6 +24,8 @@ dependencies:
   image_picker: ^0.8.4
   url_launcher: ^6.0.10
   camera: ^0.9.2
+  flutter_phone_direct_caller: ^2.1.0
+  telephony: ^0.1.4
 
 dev_dependencies:
   flutter_test:

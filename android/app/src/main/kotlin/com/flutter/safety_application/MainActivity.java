@@ -1,0 +1,47 @@
+//package com.flutter.safety_application;
+//import android.os.Bundle;
+//import io.flutter.embedding.android.FlutterActivity;
+//import io.flutter.plugin.common.MethodChannel;
+//import android.telephony.SmsManager;
+//import io.flutter.plugin.common.MethodCall;
+//import io.flutter.plugins.GeneratedPluginRegistrant;
+//
+//public class com.flutter.safety_application.MainActivity extends FlutterActivity {
+//    private static final String CHANNEL = "sendSms";
+//
+//    private MethodChannel.Result callResult;
+//
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+////        GeneratedPluginRegistrant.registerWith(this);
+//        new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(
+//                new MethodChannel.MethodCallHandler() {
+//                    @Override
+//                    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+//                        if(call.method.equals("send")){
+//                            String num = call.argument("phone");
+//                            String msg = call.argument("msg");
+//                            sendSMS(num,msg,result);
+//                        }else{
+//                            result.notImplemented();
+//                        }
+//                    }
+//                });
+//    }
+//
+//    private Object getFlutterView() {
+//        return null;
+//    }
+//
+//    private void sendSMS(String phoneNo, String msg,MethodChannel.Result result) {
+//        try {
+//            SmsManager smsManager = SmsManager.getDefault();
+//            smsManager.sendTextMessage(phoneNo, null, msg, null, null);
+//            result.success("SMS Sent");
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            result.error("Err","Sms Not Sent","");
+//        }
+//    }
+//}
