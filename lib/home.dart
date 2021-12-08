@@ -38,7 +38,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Location location = Location();
-  String lat = "", long = "", rMail="", rMobile="", name="";
+  String lat = "", long = "", rMail="", rMobile="", name="", password="", email="";
 
   IO.File? _imageFileFront, _imageFileBack;
 
@@ -123,7 +123,7 @@ class _HomeState extends State<Home> {
     await pickFrontCamera().whenComplete(() => pickBackCamera().whenComplete(() =>
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => VideoRecorder(imagePathB: _imageFileBack!.path.toString(),
-              imagePathF: _imageFileFront!.path.toString(), lat: lat, long: long, email: rMail, mobile: rMobile,)))
+              imagePathF: _imageFileFront!.path.toString(), lat: lat, long: long, rEmail: rMail, rMobile: rMobile, name: name, email: email, password: password)))
     ));
   }
 
@@ -148,9 +148,9 @@ class _HomeState extends State<Home> {
         child: const Text('No'));
     Widget continueButton = TextButton(
         onPressed: () async {
-          Navigator.canPop(context);
+          Navigator.pop(context);
           FirebaseAuth.instance.signOut().then((value) =>
-              Navigator.pushReplacement(
+              Navigator.push(
                   context, MaterialPageRoute(builder: (context) => Login())));
         },
         child: const Text('Yes'));
@@ -188,6 +188,8 @@ class _HomeState extends State<Home> {
         name = value["name"];
         rMail = value["rmail"];
         rMobile = value["rmobile"];
+        email = value["email"];
+        password = value["password"];
       });
     });
   }
@@ -203,6 +205,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -227,7 +230,13 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: name.isEmpty
+      body: Container(
+    constraints: BoxConstraints.expand(),
+    decoration: BoxDecoration(
+    image: DecorationImage(
+    image: AssetImage("assets/images/background.jpg"),
+    fit: BoxFit.cover)),
+    child: name.isEmpty
           ? Center(
           child: CircularProgressIndicator())
           : Padding(
@@ -245,7 +254,7 @@ class _HomeState extends State<Home> {
                                   .size
                                   .width / 2),
                               color: Colors.redAccent),
-                          child: Center(child: Text("Alert Me!",
+                          child: Center(child: Text("Alert",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 25),)),
                         ),
@@ -266,7 +275,7 @@ class _HomeState extends State<Home> {
                                   .size
                                   .width / 2),
                               color: Colors.green),
-                          child: Center(child: Text("Alert SMS!",
+                          child: Center(child: Text("Watch Me",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 23),)),
                         ),
@@ -286,8 +295,8 @@ class _HomeState extends State<Home> {
                                   .of(context)
                                   .size
                                   .width / 2),
-                              color: Colors.deepPurpleAccent),
-                          child: Center(child: Text("Alert Call!",
+                              color: Colors.blueAccent),
+                          child: Center(child: Text("Dummy Call",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 20),)),
                         ),
@@ -296,6 +305,6 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
-          ));
+          )));
   }
 }

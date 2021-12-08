@@ -2,22 +2,24 @@ import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mailer/flutter_mailer.dart';
 import 'package:flutter_sms/flutter_sms.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:safety_application/home.dart';
 import 'package:telephony/telephony.dart';
 
 class VideoRecorder extends StatefulWidget {
-  String imagePathB, imagePathF, lat, long, email, mobile;
+  String imagePathB, imagePathF, lat, long, rEmail, rMobile, email, password, name;
 
   VideoRecorder(
       {Key? key,
       required this.imagePathB,
       required this.imagePathF,
       required this.lat,
-      required this.long, required this.email, required this.mobile})
+      required this.long, required this.email, required this.rEmail, required this.rMobile, required this.password,
+      required this.name})
       : super(key: key);
 
   @override
@@ -26,7 +28,7 @@ class VideoRecorder extends StatefulWidget {
 
 class _VideoRecorderState extends State<VideoRecorder> {
   CameraController? controller;
-  String? videoPath;
+  // String? videoPath;
 
   List<CameraDescription>? cameras;
   int selectedCameraIdx = 0;
@@ -34,25 +36,35 @@ class _VideoRecorderState extends State<VideoRecorder> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future sendEmail(videoPath) async {
-    const GMAIL_SCHEMA = 'com.google.android.gm';
-    final MailOptions mailOptions = MailOptions(
-      body:
-          'I am in danger, please find my attached pics/video.\n\nMy Current location is -\n'
-          'https://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}',
-      subject: 'Please Help! I am Kartik',
-      recipients: [widget.email],
-      attachments: [widget.imagePathF, widget.imagePathB, videoPath],
-      appSchema: GMAIL_SCHEMA,
-    );
-    await FlutterMailer.send(mailOptions);
+    String username = widget.email;
+    String password = widget.password;
+
+    final smtpServer = gmail(username, password);
+
+    final message = Message()
+      ..from = Address(username, widget.name)
+      ..recipients.add(widget.rEmail)
+      ..subject = 'Please Help! I am ${widget.name}!'
+      ..text =  'I am in danger, please find my attached pics/video.\n\nMy Current location is -\n'
+          'https://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}'
+    ..attachments = [FileAttachment(File(widget.imagePathF)), FileAttachment(File(widget.imagePathB)), FileAttachment(File(videoPath))];
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+      Fluttertoast.showToast(msg: "Message sent");
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      Fluttertoast.showToast(msg: "Message not sent");
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
-
-    // Get the listonNewCameraSelected of available cameras.
-    // Then set the first camera as selected.
     availableCameras().then((availableCameras) {
       cameras = availableCameras;
 
@@ -270,7 +282,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
     bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
     if (permissionsGranted!) {
       telephony.sendSms(
-          to: widget.mobile,
+          to: widget.rMobile,
           message: "Please Help! I am in danger.\n\nMy current Location is -"
               "\nhttps://www.google.com/maps/search/?api=1&query=${widget.lat},${widget.long}",
           statusListener: listener
@@ -280,41 +292,24 @@ class _VideoRecorderState extends State<VideoRecorder> {
     }
   }
 
-  Future _onStopButtonPressed() async {
-    await _stopVideoRecording().then((file) {
-      videoPath = file.toString();
+  void _onStopButtonPressed() {
+    _stopVideoRecording().then((file) {
+      // videoPath = file.toString();
       if (mounted) setState(() {});
       Fluttertoast.showToast(
-          msg: 'Video recorded to $videoPath',
+          msg: 'Video recorded to $file',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.grey,
           textColor: Colors.white);
-      print(videoPath.toString());
-      sendSmsBtn().whenComplete(() => sendEmail(videoPath).whenComplete(() => () {
+      // print(videoPath.toString());
+      sendSmsBtn().whenComplete(() => sendEmail(file.toString()).then((value) {
             Navigator.pop(context);
             Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => HomePage()));
-            // showDialog(
-            //     context: context,
-            //     builder: (context) => AlertDialog(
-            //             title: Text("Alert Sent!"),
-            //             content: Text(
-            //                 "Details are sent on your mentioned email and mobile no."),
-            //             actions: [
-            //               FlatButton(
-            //                   onPressed: () {
-            //                     Navigator.pushReplacement(
-            //                         context,
-            //                         MaterialPageRoute(
-            //                             builder: (context) => HomePage()));
-            //                   },
-            //                   child: Text("OK"))
-            //             ]));
-            // Fluttertoast.showToast(msg: "Alert Sent!");
           }));
     });
   }
@@ -349,16 +344,16 @@ class _VideoRecorderState extends State<VideoRecorder> {
 
   Future _stopVideoRecording() async {
     XFile? file;
-    if (!controller!.value.isRecordingVideo) {
-      return file!.path;
-    }
-    else {
+    // if (!controller!.value.isRecordingVideo) {
+    //   return file!.path;
+    // }
+    // else {
     try {
       file = await controller!.stopVideoRecording();
       return file.path;
     } on CameraException catch (e) {
       _showCameraException(e);
-    }
+    // }
     }
   }
 

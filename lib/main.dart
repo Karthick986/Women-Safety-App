@@ -108,7 +108,13 @@ class _LoginPageState extends State<_LoginPage> {
 
     return Scaffold(
         key: _scaffoldKey,
-        body: SingleChildScrollView(
+        body: Container(
+        constraints: BoxConstraints.expand(),
+    decoration: BoxDecoration(
+    image: DecorationImage(
+    image: AssetImage("assets/images/background.jpg"),
+    fit: BoxFit.cover)),
+    child: SingleChildScrollView(
           padding: EdgeInsets.all(10.0),
           child: Center(
             child: Form(
@@ -120,15 +126,15 @@ class _LoginPageState extends State<_LoginPage> {
                         height: 50.0,
                       ),
                       Padding(
-                          padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-                          child: Text("Signin",
+                          padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 5.0),
+                          child: Text("Login",
                               style: TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.bold))),
+                                  fontSize: 25.0, fontWeight: FontWeight.bold, color: Colors.white))),
                       Padding(
                           padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                           child: Text("or use your account",
                               style: TextStyle(
-                                  fontSize: 15.0))),
+                                  fontSize: 15.0, color: Colors.white))),
                       SizedBox(
                         height: 20.0,
                       ),
@@ -140,13 +146,21 @@ class _LoginPageState extends State<_LoginPage> {
                             : null,
                         onSaved: (value) => email = value!,
                         style:
-                        TextStyle(fontSize: 15.0),
+                        TextStyle(fontSize: 15.0, color: Colors.white),
                         onChanged: (value) {},
                         decoration: InputDecoration(
                           hintText: " Email",
-                          hintStyle: TextStyle( fontSize: 15.0),
+                          hintStyle: TextStyle( fontSize: 15.0, color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white),
+                          ),
                         ),
-                      ),),
+                      ),
+                      ),
                       SizedBox(
                         height: 15.0,
                       ),
@@ -158,9 +172,16 @@ class _LoginPageState extends State<_LoginPage> {
                             ? "Enter password!"
                             : null,
                         style:
-                        TextStyle(fontSize: 15.0),
+                        TextStyle(fontSize: 15.0, color: Colors.white),
                         decoration: InputDecoration(
                           hintText: " Password",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white),
+                          ),
                           suffix: InkWell(
                             onTap: () {
                               setState(() {
@@ -168,45 +189,55 @@ class _LoginPageState extends State<_LoginPage> {
                               });
                             },
                             child: Icon(
-                              _isHidden ? Icons.visibility_off : Icons.visibility,
+                              _isHidden ? Icons.visibility_off : Icons.visibility, color: Colors.white
                             ),
                           ),
-                          hintStyle: TextStyle(fontSize: 15.0),
+                          hintStyle: TextStyle(fontSize: 15.0, color: Colors.white),
                         ),
                       ),),
                       SizedBox(
                         height: 20.0,
                       ),
-                      (isLoading) ? Container(child: CircularProgressIndicator(),) : Material(
-                        elevation: 4,
-                        color: Colors.lightBlue,
-                        borderRadius: BorderRadius.circular(5.0),
-                        child: MaterialButton(
-                          padding:
-                          EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                          onPressed: () {
-                            _submit();
-                          },
-                          child: Text(
-                            "Login",
-                            style: TextStyle(
-                                fontSize: 15.0,
-                                color: Colors.white),
+                      (isLoading) ? Container(child: CircularProgressIndicator(),) : Container(
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.only(left: 10, right: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(5))
+                        ),
+                        child: Material(
+                          elevation: 4,
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(5.0),
+                          child: MaterialButton(
+                            padding:
+                            EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                            onPressed: () {
+                              _submit();
+                            },
+                            child: Text(
+                              "Login",
+                              style: TextStyle(
+                                  fontSize: 15.0,
+                                  color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
                       GestureDetector(child: Container(
                           padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                           margin: EdgeInsets.only(top: 15.0),
-                          child: Text("New User! Register here",
+                          child: Text("Create New Account",
                               style: TextStyle(
-                                  fontSize: 14.0))),
+                                  fontSize: 14.0, color: Colors.white))),
                         onTap: () => Navigator.pushReplacement(
                             context, MaterialPageRoute(builder: (context) => SignupPage())),
                       ),
                     ])
             ),
           ),
-        ));
+        )));
   }
 }

@@ -46,7 +46,13 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text('Settings'),
       ),
-      body: email.isEmpty
+      body: Container(
+      constraints: BoxConstraints.expand(),
+      decoration: BoxDecoration(
+      image: DecorationImage(
+      image: AssetImage("assets/images/background.jpg"),
+      fit: BoxFit.cover)),
+      child: email.isEmpty
               ? Center(
                   child: CircularProgressIndicator())
               : SingleChildScrollView(
@@ -58,27 +64,29 @@ class _ProfilePageState extends State<ProfilePage> {
                             elevation: 4.0,
                             margin: EdgeInsets.all(4.0),
                             shadowColor: Colors.black26,
+                            color: Colors.transparent,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(child: Text("Your Profile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                Container(child: Text("Your Profile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
                                     margin: EdgeInsets.all(8.0), alignment: Alignment.center,),
                                 Container(
                                     child:
-                                    Text('Username:', style: TextStyle(fontSize: 16),),
+                                    Text('Username:', style: TextStyle(fontSize: 16, color: Colors.white),),
                                     margin: EdgeInsets.fromLTRB(8, 8, 8, 0)),
                                 Container(
                                     child:
-                                        TextField(style: TextStyle(fontSize: 16),
+                                        TextField(style: TextStyle(fontSize: 16, color: Colors.white),
                                         controller: _nameController,
                                         keyboardType: TextInputType.name,
                                         decoration: InputDecoration(
                                           hintText: "Enter Name",
+                                          hintStyle: TextStyle(color: Colors.white)
                                         ),),
                                     margin: EdgeInsets.fromLTRB(8, 0, 8, 8)),
                                 Container(
                                     child:
-                                        Text('Email: ' + email, style: TextStyle(fontSize: 16),
+                                        Text('Email: ' + email, style: TextStyle(fontSize: 16, color: Colors.white),
                                         maxLines: 3,),
                                     margin: EdgeInsets.fromLTRB(8, 12, 8, 12)),
                               ],
@@ -88,35 +96,38 @@ class _ProfilePageState extends State<ProfilePage> {
                       elevation: 4.0,
                       margin: EdgeInsets.all(4.0),
                       shadowColor: Colors.black26,
+                      color: Colors.transparent,
                       child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                          Container(child: Text("Settings", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                          Container(child: Text("Settings", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
                               margin: EdgeInsets.fromLTRB(8.0, 16, 8, 8), alignment: Alignment.center,),
                           Container(
                               child:
-                              Text('Receipent\'s Mail: ', style: TextStyle(fontSize: 16),),
+                              Text('Receipent\'s Mail: ', style: TextStyle(fontSize: 16, color: Colors.white),),
                               margin: EdgeInsets.fromLTRB(8, 8, 8, 0)),
                           Container(
                               child:
-                              TextField(style: TextStyle(fontSize: 16),
+                              TextField(style: TextStyle(fontSize: 16, color: Colors.white),
                                 keyboardType: TextInputType.emailAddress,
                                 controller: _rEmailController,
                                 decoration: InputDecoration(
                                   hintText: "Enter email",
+                                  hintStyle: TextStyle(color: Colors.white)
                                 ),),
                               margin: EdgeInsets.fromLTRB(8, 0, 8, 8)),
                           Container(
                               child:
-                              Text('Receipent\'s Mobile No: ', style: TextStyle(fontSize: 16),),
+                              Text('Receipent\'s Mobile No: ', style: TextStyle(fontSize: 16, color: Colors.white),),
                               margin: EdgeInsets.fromLTRB(8, 12, 8, 0)),
                           Container(
                               child:
-                              TextField(style: TextStyle(fontSize: 16),
+                              TextField(style: TextStyle(fontSize: 16, color: Colors.white),
                                 controller: _rMobController,
                                 keyboardType: TextInputType.phone,
                                 decoration: InputDecoration(
                                   hintText: "Enter mobile",
+                                  hintStyle: TextStyle(color: Colors.white)
                                 ),),
                               margin: EdgeInsets.fromLTRB(8.0, 0, 8, 12)),])),
                           SizedBox(height: 8,),
@@ -147,7 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     'rmail': _rEmailController.text,
                                     'rmobile': _rMobController.text
                                   });
-                                  Navigator.canPop(context);
+                                  Fluttertoast.showToast(msg: "Changes updated!");
                                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
                                 }
                               },
@@ -165,6 +176,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
-              ));
+              )));
   }
 }
