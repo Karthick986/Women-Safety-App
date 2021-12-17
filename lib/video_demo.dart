@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sms/flutter_sms.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:safety_application/home.dart';
 import 'package:telephony/telephony.dart';
@@ -114,7 +112,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
               children: <Widget>[
                 _cameraTogglesRowWidget(),
                 _captureControlRowWidget(),
-                Expanded(
+                const Expanded(
                   child: SizedBox(),
                 ),
               ],
@@ -309,7 +307,7 @@ class _VideoRecorderState extends State<VideoRecorder> {
             Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => HomePage()));
+                                            builder: (context) => const HomePage()));
           }));
     });
   }
@@ -327,12 +325,6 @@ class _VideoRecorderState extends State<VideoRecorder> {
 
     // Do nothing if a recording is on progress
     if (controller!.value.isRecordingVideo) {}
-
-    // final Directory appDirectory = await getApplicationDocumentsDirectory();
-    // final String videoDirectory = '${appDirectory.path}/Videos';
-    // await Directory(videoDirectory).create(recursive: true);
-    // final String currentTime = DateTime.now().millisecondsSinceEpoch.toString();
-    // final String filePath = '$videoDirectory/${currentTime}.mp4';
 
     try {
       await controller!.startVideoRecording();

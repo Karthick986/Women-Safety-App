@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:flutter_sms/flutter_sms.dart';
 import 'package:telephony/telephony.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart';
@@ -13,10 +11,9 @@ import 'package:safety_application/main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:safety_application/profile.dart';
 import 'package:safety_application/video_demo.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +23,14 @@ class HomePage extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: Home(),
+      home: const Home(),
     );
   }
 }
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -133,7 +132,7 @@ class _HomeState extends State<Home> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
           );
         });
@@ -151,7 +150,7 @@ class _HomeState extends State<Home> {
           Navigator.pop(context);
           FirebaseAuth.instance.signOut().then((value) =>
               Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Login())));
+                  context, MaterialPageRoute(builder: (context) => const Login())));
         },
         child: const Text('Yes'));
 
@@ -210,18 +209,18 @@ class _HomeState extends State<Home> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            InkWell(child: Icon(Icons.person_pin_sharp),
+            InkWell(child: const Icon(Icons.person_pin_sharp),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
             },),
-            SizedBox(width: 16,),
-            Text("Safety Application"),
+            const SizedBox(width: 16,),
+            const Text("Safety Application"),
           ],
         ),
         actions: [
           InkWell(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16.0),
               child: Icon(Icons.logout),
             ),
             onTap: () {
@@ -231,13 +230,13 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: Container(
-    constraints: BoxConstraints.expand(),
-    decoration: BoxDecoration(
+    constraints: const BoxConstraints.expand(),
+    decoration: const BoxDecoration(
     image: DecorationImage(
     image: AssetImage("assets/images/background.jpg"),
     fit: BoxFit.cover)),
     child: name.isEmpty
-          ? Center(
+          ? const Center(
           child: CircularProgressIndicator())
           : Padding(
             padding: const EdgeInsets.all(36.0),
@@ -254,7 +253,7 @@ class _HomeState extends State<Home> {
                                   .size
                                   .width / 2),
                               color: Colors.redAccent),
-                          child: Center(child: Text("Alert",
+                          child: const Center(child: Text("Alert",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 25),)),
                         ),
@@ -264,7 +263,7 @@ class _HomeState extends State<Home> {
                         },
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Expanded(
                       flex: 3,
                       child: InkWell(
@@ -275,7 +274,7 @@ class _HomeState extends State<Home> {
                                   .size
                                   .width / 2),
                               color: Colors.green),
-                          child: Center(child: Text("Watch Me",
+                          child: const Center(child: Text("Watch Me",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 23),)),
                         ),
@@ -285,7 +284,7 @@ class _HomeState extends State<Home> {
                         },
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Expanded(
                       flex: 3,
                       child: InkWell(
@@ -296,7 +295,7 @@ class _HomeState extends State<Home> {
                                   .size
                                   .width / 2),
                               color: Colors.blueAccent),
-                          child: Center(child: Text("Dummy Call",
+                          child: const Center(child: Text("Dummy Call",
                             style: TextStyle(
                                 color: Colors.white, fontSize: 20),)),
                         ),
